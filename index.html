@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>赛博霓虹骑士 | Cyber Neon Rider</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #050510;
+      font-family: 'Press Start 2P', monospace, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at center, #0a0a2e 0%, #050510 70%, #000005 100%);
+    }
+
+    .game-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .game-title {
+      color: #ff00ff;
+      font-size: 12px;
+      text-shadow: 0 0 10px #ff00ff, 0 0 20px #9d00ff;
+      letter-spacing: 2px;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .game-title span {
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+    }
+
+    canvas {
+      border: 3px solid #ff00ff;
+      border-radius: 4px;
+      box-shadow: 
+        0 0 20px rgba(255, 0, 255, 0.6),
+        0 0 40px rgba(157, 0, 255, 0.4),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+
+    .controls-hint {
+      color: #666688;
+      font-size: 9px;
+      text-align: center;
+      line-height: 2;
+    }
+
+    .controls-hint kbd {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #1a1a3a;
+      border: 1px solid #333355;
+      border-radius: 3px;
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      margin: 0 2px;
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      opacity: 0.3;
+      z-index: 10;
+    }
+
+    .canvas-container {
+      position: relative;
+    }
+
+    @media (max-width: 520px) {
+      canvas {
+        width: 100vw;
+        height: calc(100vw * 1.5);
+        max-width: 480px;
+        max-height: 720px;
+      }
+      
+      .game-title {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-title">
+      赛博霓虹骑士 <br>
+      <span>CYBER NEON RIDER</span>
+    </div>
+    
+    <div class="canvas-container">
+      <canvas id="gameCanvas"></canvas>
+      <div class="scanlines"></div>
+    </div>
+
+    <div class="controls-hint">
+      <kbd>←</kbd> <kbd>→</kbd> 移动 &nbsp;&nbsp; 
+      <kbd>SPACE</kbd> 开始 / 重来
+    </div>
+  </div>
+
+  <script type="module">
+    import { Game } from './src/game.js';
+
+    const canvas = document.getElementById('gameCanvas');
+    const game = new Game(canvas);
+    game.start();
+  </script>
+</body>
+</html>
