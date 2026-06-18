@@ -1,4 +1,4 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, COLORS } from './constants.js';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, COLORS, NITRO_MAX } from './constants.js';
 import { drawPixelText, drawPixelRect } from './utils.js';
 
 export class UI {
@@ -19,6 +19,99 @@ export class UI {
 
     const hiStr = `HI ${highScore.toString().padStart(4, '0')}`;
     drawPixelText(ctx, hiStr, CANVAS_WIDTH - 20, 16, COLORS.NEON_PINK, COLORS.NEON_PINK, 14, 6, 'right');
+  }
+
+  renderNitroBar(ctx, nitro, isActive) {
+    const barX = 20;
+    const barY = 78;
+    const barWidth = 140;
+    const barHeight = 16;
+    const innerPadding = 2;
+
+    const nitroRatio = Math.max(0, Math.min(1, nitro / NITRO_MAX));
+    const fillWidth = Math.floor((barWidth - innerPadding * 2) * nitroRatio);
+
+    ctx.save();
+    ctx.shadowColor = COLORS.NEON_CYAN;
+    ctx.shadowBlur = isActive ? 12 : 6;
+    ctx.strokeStyle = isActive ? COLORS.NEON_WHITE : COLORS.NEON_CYAN;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(barX, barY, barWidth, barHeight);
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(0, 20, 40, 0.8)';
+    ctx.fillRect(barX + 1, barY + 1, barWidth - 2, barHeight - 2);
+
+    if (fillWidth > 0) {
+      const fillX = barX + innerPadding;
+      const fillY = barY + innerPadding;
+      const fillH = barHeight - innerPadding * 2;
+
+      let barColor, glowColor;
+      if (isActive) {
+        if (nitroRatio > 0.3) {
+          barColor = COLORS.NEON_WHITE;
+          glowColor = COLORS.NEON_CYAN;
+        } else {
+          barColor = COLORS.NEON_CYAN;
+          glowColor = COLORS.NEON_BLUE;
+        }
+      } else {
+        if (nitroRatio > 0.5) {
+          barColor = COLORS.NEON_CYAN;
+          glowColor = COLORS.NEON_CYAN;
+        } else if (nitroRatio > 0.2) {
+          barColor = COLORS.NEON_BLUE;
+          glowColor = COLORS.NEON_BLUE;
+        } else {
+          barColor = COLORS.NEON_DEEP_BLUE;
+          glowColor = COLORS.NEON_DEEP_BLUE;
+        }
+      }
+
+      ctx.save();
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = isActive ? 14 : 8;
+      ctx.fillStyle = barColor;
+      ctx.fillRect(fillX, fillY, fillWidth, fillH);
+
+      if (isActive && fillWidth > 4) {
+        const stripeWidth = 6;
+        const stripeGap = 8;
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#ffffff';
+        for (let sx = fillX + 2; sx < fillX + fillWidth - 2; sx += stripeGap) {
+          const sw = Math.min(stripeWidth, (fillX + fillWidth - 2) - sx);
+          ctx.fillRect(sx, fillY + 2, sw, fillH - 4);
+        }
+      }
+      ctx.restore();
+    }
+
+    drawPixelText(
+      ctx,
+      'NITRO',
+      barX,
+      barY - 16,
+      isActive ? COLORS.NEON_WHITE : COLORS.NEON_CYAN,
+      isActive ? COLORS.NEON_CYAN : COLORS.NEON_CYAN,
+      10,
+      isActive ? 8 : 4,
+      'left'
+    );
+
+    const nitroPct = Math.floor(nitroRatio * 100);
+    drawPixelText(
+      ctx,
+      `${nitroPct}%`,
+      barX + barWidth,
+      barY + 1,
+      nitroRatio < 0.15 ? COLORS.NEON_RED : (isActive ? COLORS.NEON_WHITE : COLORS.NEON_CYAN),
+      isActive ? COLORS.NEON_CYAN : null,
+      10,
+      4,
+      'right'
+    );
   }
 
   renderStartScreen(ctx) {

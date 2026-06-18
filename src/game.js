@@ -1,4 +1,4 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, GAME_STATES, SCORE_PER_OBSTACLE, OBSTACLE_MAX_SPEED } from './constants.js';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, GAME_STATES, SCORE_PER_OBSTACLE, OBSTACLE_MAX_SPEED, NITRO_MAX, NITRO_DRAIN_RATE, NITRO_RECHARGE_RATE, NITRO_SPEED_MULTIPLIER } from './constants.js';
 import { Background } from './background.js';
 import { Player } from './player.js';
 import { ObstacleManager } from './obstacle.js';
@@ -15,6 +15,9 @@ export class Game {
     this.state = GAME_STATES.START;
     this.score = 0;
     this.highScore = this._loadHighScore();
+    this.nitro = NITRO_MAX;
+    this.isNitroActive = false;
+    this.currentSpeedMultiplier = 1;
 
     this.background = new Background(CANVAS_WIDTH, CANVAS_HEIGHT);
     this.player = new Player(
@@ -57,6 +60,9 @@ export class Game {
 
   init() {
     this.score = 0;
+    this.nitro = NITRO_MAX;
+    this.isNitroActive = false;
+    this.currentSpeedMultiplier = 1;
     this.player.reset();
     this.obstacleManager.reset();
     this.lastTime = performance.now();
@@ -121,6 +127,31 @@ export class Game {
       return;
     }
 
+    const spaceHeld = this.input.isSpaceHeld();
+    this.isNitroActive = spaceHeld && this.nitro > 0;
+
+    const dtFactor = this.deltaTime / 16.67;
+
+    if (this.isNitroActive) {
+      this.nitro -= NITRO_DRAIN_RATE * dtFactor;
+      if (this.nitro <= 0) {
+        this.nitro = 0;
+        this.isNitroActive = false;
+      }
+    } else {
+      this.nitro += NITRO_RECHARGE_RATE * dtFactor;
+      if (this.nitro > NITRO_MAX) {
+        this.nitro = NITRO_MAX;
+      }
+    }
+
+    this.player.setNitroActive(this.isNitroActive);
+
+    this.currentSpeedMultiplier = this.obstacleManager.speedMultiplier;
+    if (this.isNitroActive) {
+      this.currentSpeedMultiplier *= NITRO_SPEED_MULTIPLIER;
+    }
+
     if (this.input.isLeftPressed()) {
       this.player.moveLeft();
     } else if (this.input.isRightPressed()) {
@@ -130,9 +161,11 @@ export class Game {
     }
 
     this.player.update(this.deltaTime);
-    this.obstacleManager.update(this.currentTime, this.deltaTime);
     this.obstacleManager.setDifficulty(this.score);
-    this.background.update(OBSTACLE_MAX_SPEED * this.obstacleManager.speedMultiplier, this.deltaTime);
+
+    const nitroBoost = this.isNitroActive ? NITRO_SPEED_MULTIPLIER : 1;
+    this.obstacleManager.update(this.currentTime, this.deltaTime, nitroBoost);
+    this.background.update(OBSTACLE_MAX_SPEED * this.obstacleManager.speedMultiplier * nitroBoost, this.deltaTime);
 
     const passed = this.obstacleManager.checkPassed(this.player.y);
     if (passed > 0) {
@@ -158,6 +191,7 @@ export class Game {
       this.obstacleManager.render(this.ctx);
       this.player.render(this.ctx);
       this.ui.renderScore(this.ctx, this.score, this.highScore);
+      this.ui.renderNitroBar(this.ctx, this.nitro, this.isNitroActive);
       this.ui.renderPauseHint(this.ctx);
     }
 

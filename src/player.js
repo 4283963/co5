@@ -13,7 +13,9 @@ export class Player {
     this.vx = 0;
     this.tiltAngle = 0;
     this.exhaustParticles = [];
+    this.nitroParticles = [];
     this.glowPhase = 0;
+    this.isNitroActive = false;
   }
 
   reset() {
@@ -22,6 +24,8 @@ export class Player {
     this.vx = 0;
     this.tiltAngle = 0;
     this.exhaustParticles = [];
+    this.nitroParticles = [];
+    this.isNitroActive = false;
   }
 
   moveLeft() {
@@ -51,6 +55,18 @@ export class Player {
     }
 
     this._updateExhaustParticles();
+
+    if (this.isNitroActive) {
+      const particleCount = 3;
+      for (let i = 0; i < particleCount; i++) {
+        this._addNitroParticle();
+      }
+    }
+    this._updateNitroParticles();
+  }
+
+  setNitroActive(active) {
+    this.isNitroActive = active;
   }
 
   _addExhaustParticle() {
@@ -73,6 +89,72 @@ export class Player {
       if (p.life <= 0) {
         this.exhaustParticles.splice(i, 1);
       }
+    }
+  }
+
+  _addNitroParticle() {
+    const centerX = this.x + this.width / 2;
+    const baseY = this.y + this.height + 2;
+    const randomType = Math.random();
+    let color, size, speedMultiplier;
+
+    if (randomType < 0.35) {
+      color = COLORS.NEON_WHITE;
+      size = 3 + Math.random() * 3;
+      speedMultiplier = 1.6;
+    } else if (randomType < 0.7) {
+      color = COLORS.NEON_CYAN;
+      size = 4 + Math.random() * 4;
+      speedMultiplier = 1.3;
+    } else {
+      color = Math.random() > 0.5 ? COLORS.NEON_BLUE : COLORS.NEON_DEEP_BLUE;
+      size = 5 + Math.random() * 5;
+      speedMultiplier = 1.0;
+    }
+
+    this.nitroParticles.push({
+      x: centerX + (Math.random() - 0.5) * 14,
+      y: baseY + Math.random() * 6,
+      vy: (5 + Math.random() * 4) * speedMultiplier,
+      vx: (Math.random() - 0.5) * 1.2,
+      size: size,
+      life: 1,
+      color: color
+    });
+  }
+
+  _updateNitroParticles() {
+    for (let i = this.nitroParticles.length - 1; i >= 0; i--) {
+      const p = this.nitroParticles[i];
+      p.y += p.vy;
+      p.x += p.vx;
+      p.life -= 0.05;
+      p.size *= 0.96;
+      p.vx *= 0.98;
+      if (p.life <= 0 || p.size < 1) {
+        this.nitroParticles.splice(i, 1);
+      }
+    }
+  }
+
+  _renderNitroFlame(ctx) {
+    for (let i = this.nitroParticles.length - 1; i >= 0; i--) {
+      const p = this.nitroParticles[i];
+      const alpha = Math.min(p.life * 1.2, 1);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = p.color;
+      const px = Math.floor(p.x - p.size / 2);
+      const py = Math.floor(p.y - p.size / 2);
+      ctx.fillRect(px, py, Math.ceil(p.size), Math.ceil(p.size));
+      if (p.size >= 4) {
+        ctx.globalAlpha = alpha * 0.5;
+        ctx.fillRect(px - 1, py, Math.ceil(p.size) + 2, Math.ceil(p.size));
+        ctx.fillRect(px, py - 1, Math.ceil(p.size), Math.ceil(p.size) + 2);
+      }
+      ctx.restore();
     }
   }
 
@@ -147,6 +229,7 @@ export class Player {
 
   render(ctx) {
     this._renderExhaust(ctx);
+    this._renderNitroFlame(ctx);
 
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);

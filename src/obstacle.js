@@ -209,7 +209,7 @@ export class ObstacleManager {
     this.spawnInterval = Math.max(500, OBSTACLE_SPAWN_INTERVAL - score * 2);
   }
 
-  update(currentTime, deltaTime) {
+  update(currentTime, deltaTime, extraSpeedMultiplier = 1) {
     if (currentTime - this.lastSpawnTime > this.spawnInterval) {
       this._spawn();
       this.lastSpawnTime = currentTime;
@@ -217,7 +217,7 @@ export class ObstacleManager {
 
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       const obs = this.obstacles[i];
-      obs.update(this.speedMultiplier, deltaTime);
+      obs.update(this.speedMultiplier * extraSpeedMultiplier, deltaTime);
       if (obs.isOffScreen()) {
         this.obstacles.splice(i, 1);
       }

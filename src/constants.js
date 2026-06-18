@@ -11,6 +11,11 @@ export const OBSTACLE_SPAWN_INTERVAL = 1100;
 
 export const SCORE_PER_OBSTACLE = 10;
 
+export const NITRO_MAX = 100;
+export const NITRO_DRAIN_RATE = 0.8;
+export const NITRO_RECHARGE_RATE = 0.3;
+export const NITRO_SPEED_MULTIPLIER = 2.0;
+
 export const ROAD_LEFT = 60;
 export const ROAD_RIGHT = CANVAS_WIDTH - 60;
 
@@ -23,6 +28,9 @@ export const COLORS = {
   NEON_RED: '#ff3366',
   NEON_GREEN: '#00ff66',
   NEON_ORANGE: '#ff8800',
+  NEON_BLUE: '#0088ff',
+  NEON_DEEP_BLUE: '#0044ff',
+  NEON_WHITE: '#aaddff',
   ROAD_LINE: '#1a1a3a',
   ROAD_DARK: '#0d0d20'
 };

@@ -69,6 +69,10 @@ export class InputHandler {
     return pressed;
   }
 
+  isSpaceHeld() {
+    return this.keys.space;
+  }
+
   isBJustPressed() {
     const pressed = this.keys.bKeyPressed;
     this.keys.bKeyPressed = false;
