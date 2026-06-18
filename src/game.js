@@ -30,6 +30,7 @@ export class Game {
     this.deltaTime = 0;
     this.isRunning = false;
     this.animationId = null;
+    this.debugMode = false;
 
     this._handleSpace = this._handleSpace.bind(this);
     this._gameLoop = this._gameLoop.bind(this);
@@ -106,6 +107,10 @@ export class Game {
         this.state = GAME_STATES.PLAYING;
       }
     }
+
+    if (this.input.isBJustPressed()) {
+      this.debugMode = !this.debugMode;
+    }
   }
 
   update() {
@@ -134,7 +139,7 @@ export class Game {
       this.score += passed * SCORE_PER_OBSTACLE;
     }
 
-    if (this.obstacleManager.checkCollisions(this.player.getBounds())) {
+    if (this.obstacleManager.checkCollisions(this.player.getCollisionRects())) {
       this._gameOver();
     }
   }
@@ -161,5 +166,51 @@ export class Game {
     } else if (this.state === GAME_STATES.GAME_OVER) {
       this.ui.renderGameOver(this.ctx, this.score, this.highScore);
     }
+
+    if (this.debugMode) {
+      this._renderCollisionDebug();
+    }
+  }
+
+  _renderCollisionDebug() {
+    const ctx = this.ctx;
+
+    ctx.save();
+    const playerRects = this.player.getCollisionRects();
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#00ff00';
+    ctx.shadowBlur = 6;
+    playerRects.forEach(rect => {
+      ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+    });
+
+    ctx.strokeStyle = '#ff0066';
+    ctx.shadowColor = '#ff0066';
+    this.obstacleManager.getObstacles().forEach(obs => {
+      const obsRects = obs.getCollisionRects();
+      obsRects.forEach(rect => {
+        ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+      });
+    });
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(8, CANVAS_HEIGHT - 30, 180, 22);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('[B] 碰撞调试: 开启', 16, CANVAS_HEIGHT - 15);
+    ctx.fillStyle = '#00ff00';
+    ctx.fillRect(12, CANVAS_HEIGHT - 24, 8, 8);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('= 玩家', 24, CANVAS_HEIGHT - 15);
+    ctx.fillStyle = '#ff0066';
+    ctx.fillRect(60, CANVAS_HEIGHT - 24, 8, 8);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('= 障碍物', 72, CANVAS_HEIGHT - 15);
+    ctx.restore();
   }
 }

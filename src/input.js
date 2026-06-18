@@ -4,7 +4,9 @@ export class InputHandler {
       left: false,
       right: false,
       space: false,
-      spacePressed: false
+      spacePressed: false,
+      bKey: false,
+      bKeyPressed: false
     };
 
     this.touchStartX = 0;
@@ -29,6 +31,12 @@ export class InputHandler {
         }
         this.keys.space = true;
       }
+      if (e.code === 'KeyB') {
+        if (!this.keys.bKey) {
+          this.keys.bKeyPressed = true;
+        }
+        this.keys.bKey = true;
+      }
     });
 
     window.addEventListener('keyup', (e) => {
@@ -40,6 +48,9 @@ export class InputHandler {
       }
       if (e.code === 'Space') {
         this.keys.space = false;
+      }
+      if (e.code === 'KeyB') {
+        this.keys.bKey = false;
       }
     });
   }
@@ -55,6 +66,12 @@ export class InputHandler {
   isSpaceJustPressed() {
     const pressed = this.keys.spacePressed;
     this.keys.spacePressed = false;
+    return pressed;
+  }
+
+  isBJustPressed() {
+    const pressed = this.keys.bKeyPressed;
+    this.keys.bKeyPressed = false;
     return pressed;
   }
 

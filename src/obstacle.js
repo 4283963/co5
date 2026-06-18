@@ -7,7 +7,7 @@ import {
   ROAD_RIGHT,
   CANVAS_HEIGHT
 } from './constants.js';
-import { randomRange, randomInt, drawPixelRect, rectIntersect } from './utils.js';
+import { randomRange, randomInt, drawPixelRect, rectIntersect, multiRectIntersect, multiRectWithSingleRectIntersect } from './utils.js';
 
 class Obstacle {
   constructor(x, y, type) {
@@ -44,6 +44,44 @@ class Obstacle {
       width: this.width,
       height: this.height
     };
+  }
+
+  getCollisionRects() {
+    const rects = [];
+    const x = this.x;
+    const y = this.y;
+
+    if (this.type === 'box') {
+      rects.push({
+        x: x + 3,
+        y: y + 3,
+        width: this.width - 6,
+        height: this.height - 6
+      });
+    } else {
+      rects.push({
+        x: x + 4,
+        y: y + 6,
+        width: this.width - 8,
+        height: 22
+      });
+
+      rects.push({
+        x: x + 5,
+        y: y + 32,
+        width: this.width - 10,
+        height: 52
+      });
+
+      rects.push({
+        x: x + 10,
+        y: y + 84,
+        width: this.width - 20,
+        height: 10
+      });
+    }
+
+    return rects;
   }
 
   render(ctx) {
@@ -196,7 +234,7 @@ export class ObstacleManager {
     
     const hasOverlap = this.obstacles.some(obs => {
       const distance = Math.abs(obs.y - newObs.y);
-      return distance < 120 && rectIntersect(newObs.getBounds(), obs.getBounds());
+      return distance < 120 && multiRectIntersect(newObs.getCollisionRects(), obs.getCollisionRects());
     });
     
     if (!hasOverlap) {
@@ -215,8 +253,14 @@ export class ObstacleManager {
     return scoreGain;
   }
 
-  checkCollisions(playerBounds) {
-    return this.obstacles.some(obs => rectIntersect(playerBounds, obs.getBounds()));
+  checkCollisions(playerCollisionRects) {
+    for (let i = 0; i < this.obstacles.length; i++) {
+      const obs = this.obstacles[i];
+      if (multiRectIntersect(playerCollisionRects, obs.getCollisionRects())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   render(ctx) {

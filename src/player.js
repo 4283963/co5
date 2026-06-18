@@ -85,6 +85,66 @@ export class Player {
     };
   }
 
+  getCollisionRects() {
+    const rects = [];
+    const x = this.x;
+    const y = this.y;
+
+    const tiltOffsetX = Math.sin(this.tiltAngle) * 6;
+    const tiltOffsetY = Math.abs(Math.sin(this.tiltAngle)) * 3;
+
+    rects.push({
+      x: x + 12 + tiltOffsetX * 0.3,
+      y: y + 2 - tiltOffsetY,
+      width: 24,
+      height: 20
+    });
+
+    rects.push({
+      x: x + 14 + tiltOffsetX * 0.5,
+      y: y + 20,
+      width: 20,
+      height: 22
+    });
+
+    rects.push({
+      x: x + 14 + tiltOffsetX * 0.5,
+      y: y + 40,
+      width: 20,
+      height: 12
+    });
+
+    rects.push({
+      x: x + 4 + tiltOffsetX * 0.2,
+      y: y + 50,
+      width: 40,
+      height: 12
+    });
+
+    rects.push({
+      x: x + 4 + tiltOffsetX * 0.1,
+      y: y + 8 - tiltOffsetY * 0.5,
+      width: 10,
+      height: 16
+    });
+
+    rects.push({
+      x: x + 4 + tiltOffsetX * 0.3,
+      y: y + 52,
+      width: 12,
+      height: 18
+    });
+
+    rects.push({
+      x: x + 32 + tiltOffsetX * 0.3,
+      y: y + 50,
+      width: 12,
+      height: 20
+    });
+
+    return rects;
+  }
+
   render(ctx) {
     this._renderExhaust(ctx);
 

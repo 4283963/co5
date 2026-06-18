@@ -1,11 +1,50 @@
 export function rectIntersect(rect1, rect2) {
-  const shrink = 6;
   return (
-    rect1.x + shrink < rect2.x + rect2.width - shrink &&
-    rect1.x + rect1.width - shrink > rect2.x + shrink &&
-    rect1.y + shrink < rect2.y + rect2.height - shrink &&
-    rect1.y + rect1.height - shrink > rect2.y + shrink
+    rect1.x < rect2.x + rect2.width &&
+    rect1.x + rect1.width > rect2.x &&
+    rect1.y < rect2.y + rect2.height &&
+    rect1.y + rect1.height > rect2.y
   );
+}
+
+export function circleRectIntersect(circle, rect) {
+  const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
+  const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
+  
+  const distanceX = circle.x - closestX;
+  const distanceY = circle.y - closestY;
+  const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+  
+  return distanceSquared < circle.radius * circle.radius;
+}
+
+export function multiRectIntersect(rects1, rects2) {
+  for (let i = 0; i < rects1.length; i++) {
+    for (let j = 0; j < rects2.length; j++) {
+      if (rectIntersect(rects1[i], rects2[j])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+export function multiRectWithSingleRectIntersect(multiRects, singleRect) {
+  for (let i = 0; i < multiRects.length; i++) {
+    if (rectIntersect(multiRects[i], singleRect)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function shrinkRect(rect, shrinkX, shrinkY = shrinkX) {
+  return {
+    x: rect.x + shrinkX,
+    y: rect.y + shrinkY,
+    width: rect.width - shrinkX * 2,
+    height: rect.height - shrinkY * 2
+  };
 }
 
 export function randomRange(min, max) {
